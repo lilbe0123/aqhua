@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: url('stripped.gif') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        h1 {
+            font-family: 'Bungee', cursive;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(255, 105, 180, 0.8);
+        }
+        p {
+            font-size: 14px;
+            font-family: 'Verdana', sans-serif;
+            color: #ccc;
+            margin-top: 10px;
+        }
+        a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .button {
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .discord-button {
+            background-color: #008000;
+            box-shadow: 0px 4px 10px rgba(0, 128, 0, 0.5);
+        }
+        .discord-button:hover {
+            background-color: #006400;
+        }
+        .instagram-button {
+            background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+        }
+        .instagram-button:hover {
+            background: linear-gradient(45deg, #f7b731, #d10869, #4f1db6);
+        }
+        .tiktok-button {
+            background-color: black;
+            border: 2px solid white;
+        }
+        .tiktok-button:hover {
+            background-color: #222;
+        }
+        .update-message {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+        }
+        .button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Full-screen overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-family: 'Arial', sans-serif;
+            cursor: pointer;
+            z-index: 10;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay with "enter." text -->
+    <div class="overlay" id="overlay" onclick="removeOverlay()">
+        enter.
+    </div>
+
+    <div class="container">
+        <h1 id="discord-username"></h1>
+        <p><a id="guns-link" href="#" target="_blank"></a></p>
+        
+        <a id="discord-button" href="#" target="_blank">
+            <button class="button discord-button">Active</button>
+        </a>
+
+        <a id="instagram-button" href="#" target="_blank">
+            <button class="button instagram-button">
+                <img src="instagram.png" alt="Instagram"> Instagram
+            </button>
+        </a>
+
+        <a id="tiktok-button" href="#" target="_blank">
+            <button class="button tiktok-button">
+                <img src="tiktok.png" alt="TikTok"> TikTok
+            </button>
+        </a>
+
+        <p class="update-message">If I get termed, this will be updated.</p>
+    </div>
+
+    <!-- Hidden autoplaying audio -->
+    <audio id="background-audio" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <script>
+        async function loadConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+
+                // Set Discord username (no link, plain text)
+                document.getElementById("discord-username").textContent = `${config.username} is not terminated`;
+
+                // Set Discord profile link
+                document.getElementById("discord-button").href = `https://discord.com/users/${config.discord_id}`;
+
+                // Set Guns.lol or alternative link
+                document.getElementById("guns-link").href = config.link;
+                document.getElementById("guns-link").textContent = config.link;
+
+                // Set Instagram link
+                document.getElementById("instagram-button").href = config.instagram;
+
+                // Set TikTok link
+                document.getElementById("tiktok-button").href = config.tiktok;
+
+                // Store the song count for later use
+                window.songCount = config.song_count;
+            } catch (error) {
+                console.error("Error loading config.json:", error);
+            }
+        }
+
+        function getRandomSong() {
+            if (typeof window.songCount === "undefined") return;  // Prevent errors if config isn't loaded yet
+
+            const randomNumber = Math.floor(Math.random() * window.songCount) + 1; // Random number based on config
+            const randomSong = `stripped/${randomNumber}.mp3`;
+
+            const audio = document.getElementById("background-audio");
+            audio.src = randomSong;
+            audio.play();
+        }
+
+        function removeOverlay() {
+            let overlay = document.getElementById("overlay");
+            overlay.classList.add("hidden");
+            getRandomSong();  // Play a random song after removing overlay
+        }
+
+        // Load config data and select a random song when the page loads
+        window.onload = function() {
+            loadConfig().then(getRandomSong);
+        };
+    </script>
+
+</body>
+</html>
